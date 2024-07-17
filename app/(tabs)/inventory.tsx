@@ -1,9 +1,11 @@
+import TrophyList from '../../components/trophylist';
 import { View, Text, StyleSheet } from 'react-native';
 
 export default function InventoryScreen() {
   return (
     <View style={styles.container}>
-      <Text>Inventory</Text>
+      <Text style={styles.header}>Inventory</Text>
+      <TrophyList />
     </View>
   );
 }
@@ -11,7 +13,13 @@ export default function InventoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
   },
 });

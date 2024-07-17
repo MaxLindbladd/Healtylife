@@ -4,6 +4,7 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { Pedometer } from 'expo-sensors';
 import { useEffect, useState } from 'react';
+import { saveTrophy } from '@/lib/appwrite';
 
 const PlaceholderImage = require('/Users/maxlindblad/Healtylife/assets/images/react-logo.png');
 const windowWidth = Dimensions.get('window').width;
@@ -28,9 +29,9 @@ export default function HomeScreen() {
         setPastStepCount(pastStepCountResult.steps);
       }
 
-      return Pedometer.watchStepCount(result => {
-        setCurrentStepCount(result.steps);
-      });
+      
+
+      
     }
   };
 
@@ -38,6 +39,14 @@ export default function HomeScreen() {
     const subscription = subscribe();
     return () => subscription && subscription.remove();
   }, []);
+
+
+  useEffect(() => {
+    if (pastStepCount >= 100) {
+      console.log("annetaan trophy")
+      saveTrophy();
+    }
+  }, [pastStepCount]);
 
   return (
     <SafeAreaView style={{backgroundColor: "#afafaf"}}>
@@ -50,7 +59,7 @@ export default function HomeScreen() {
           <View style={styles.thumbs}>
             <Image source={PlaceholderImage} style={styles.image} />
             <View style={styles.thumbsColumn}>
-              <Text style={styles.centeredText}>olet saanut {currentStepCount} askelta tänää </Text>
+              <Text style={styles.centeredText}>olet saanut {pastStepCount} askelta tänää </Text>
               <Text style={styles.centeredText}>sinulla on 7x streak</Text>
             </View>
           </View>

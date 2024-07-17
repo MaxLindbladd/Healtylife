@@ -17,7 +17,18 @@ export const appwriteConfig = {
     storageid: "6693e715001de1e3d145"
 }
 
-
+const trophies = [
+  "Trophy 1",
+  "Trophy 2",
+  "Trophy 3",
+  "Trophy 4",
+  "Trophy 5",
+  "Trophy 6",
+  "Trophy 7",
+  "Trophy 8",
+  "Trophy 9",
+  "Trophy 10",
+];
 
 
 const client = new Client();
@@ -112,3 +123,50 @@ export async function signOut() {
     console.log(error);
   }
 }
+
+
+
+function getRandomTrophy() {
+  const randomIndex = Math.floor(Math.random() * trophies.length);
+  return trophies[randomIndex];
+}
+
+async function saveTrophy() {
+  const trophy = getRandomTrophy();
+  
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error('No user found');
+
+    const response = await databases.createDocument(
+      appwriteConfig.databaseid,
+      appwriteConfig.trophyscollectionid,
+      ID.unique(),
+      {
+        userid: currentUser.$id,
+        trophy: trophy,
+      }
+    );
+    console.log('Trophy saved:', response);
+  } catch (error) {
+    console.error('Error saving trophy:', error);
+  }
+}
+
+export { saveTrophy };
+
+async function getUserTrophies(userid) {
+  try {
+    const response = await databases.listDocuments(
+      appwriteConfig.databaseid,
+      appwriteConfig.trophyscollectionid,
+      [Query.equal("userid", userid)]
+    );
+    return response.documents;
+  } catch (error) {
+    console.error('Error fetching trophies:', error);
+    return [];
+  }
+}
+
+export { getUserTrophies };
