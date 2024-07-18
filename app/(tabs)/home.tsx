@@ -1,10 +1,12 @@
-import { Link } from 'expo-router';
-import { View, Text, StyleSheet, Dimensions, Image, SafeAreaView } from 'react-native';
+import { Link, useFocusEffect } from 'expo-router';
+import { View, Text, StyleSheet, Dimensions, Image, SafeAreaView, ScrollView } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { Pedometer } from 'expo-sensors';
 import { useEffect, useState } from 'react';
-import { saveTrophy } from '@/lib/appwrite';
+import { getCurrentUser, saveTrophy, getUserTask } from '@/lib/appwrite';
+import Thumbs from '@/components/thumbs';
+import React from 'react';
 
 const PlaceholderImage = require('/Users/maxlindblad/Healtylife/assets/images/react-logo.png');
 const windowWidth = Dimensions.get('window').width;
@@ -13,7 +15,8 @@ export default function HomeScreen() {
 
   const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking');
   const [pastStepCount, setPastStepCount] = useState(0);
-  const [currentStepCount, setCurrentStepCount] = useState(0);
+  const [task, setTask] = useState([]);
+  const [trophyGiven, setTophyGiven] = useState(false);
 
   const subscribe = async () => {
     const isAvailable = await Pedometer.isAvailableAsync();
@@ -28,10 +31,6 @@ export default function HomeScreen() {
       if (pastStepCountResult) {
         setPastStepCount(pastStepCountResult.steps);
       }
-
-      
-
-      
     }
   };
 
@@ -44,57 +43,63 @@ export default function HomeScreen() {
   useEffect(() => {
     if (pastStepCount >= 100) {
       console.log("annetaan trophy")
-      saveTrophy();
+      //saveTrophy();                          ettei database täyty liikaa  poista kommentti jos haluat käyttää
+      setTophyGiven(true);
     }
   }, [pastStepCount]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchTasks = async () => {
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+          const fetchedTasks = await getUserTask(currentUser.$id);
+          setTask(fetchedTasks);
+          console.log("Fetched tasks:", fetchedTasks);
+        }
+      };
+
+      fetchTasks();
+
+      return () => {
+        // Cleanup function if needed
+      };
+    }, [])
+  );
+
   return (
-    <SafeAreaView style={{backgroundColor: "#afafaf"}}>
+    <SafeAreaView style={{backgroundColor: "#afafaf", flexGrow: 1}}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
       <View style={styles.container}>
         <View style={styles.topRow}>
           <View style={styles.topText}>
             <Text>Hello Max!</Text>
             <Text>You have done amazing today</Text>
           </View>
-          <View style={styles.thumbs}>
-            <Image source={PlaceholderImage} style={styles.image} />
-            <View style={styles.thumbsColumn}>
-              <Text style={styles.centeredText}>olet saanut {pastStepCount} askelta tänää </Text>
-              <Text style={styles.centeredText}>sinulla on 7x streak</Text>
-            </View>
-          </View>
+          <Thumbs
+            imageSource={PlaceholderImage}
+            title={`olet saanut ${pastStepCount} askelta tänää`}
+            period="sinulla on 7x streak"
+          />
         </View>
         <Text style={styles.leftAlignedText} >päivittäiset tehtävät</Text>
-        <View style={styles.thumbs}>
-          <Image source={PlaceholderImage} style={styles.image} />
-          <View style={styles.thumbsColumn}>
-            <Text style={styles.centeredText}>oletko ottanut vitamiinit tänään</Text>
-            <Text style={styles.centeredText}>klo 20:20</Text>
-          </View>
-          <BouncyCheckbox style={styles.checkbox} onPress={(isChecked: boolean) => {}} />
+        
+        {task.map((task, index) => (
+        <View key={index} style={{ paddingVertical: 10 }}> 
+        <Thumbs
+        key={index}
+        imageSource={PlaceholderImage}
+        title={task.title}
+        period={task.period}
+        showCheckbox={true}
+        onCheckboxPress={(isChecked) => console.log(`Checkbox  is ${isChecked}`)}
+        />
         </View>
-        <View style={{paddingVertical:10}}></View>
-
-        <View style={styles.thumbs}>
-          <Image source={PlaceholderImage} style={styles.image} />
-          <View style={styles.thumbsColumn}>
-            <Text style={styles.centeredText}>oletko ottanut vitamiinit tänään</Text>
-            <Text style={styles.centeredText}>klo 20:20</Text>
-          </View>
-          <BouncyCheckbox style={styles.checkbox} onPress={(isChecked: boolean) => {}} />
-        </View>
-        <View style={{paddingVertical:10}}></View>
         
 
-        <View style={styles.thumbs}>
-          <Image source={PlaceholderImage} style={styles.image} />
-          <View style={styles.thumbsColumn}>
-            <Text style={styles.centeredText}>oletko ottanut vitamiinit tänään</Text>
-            <Text style={styles.centeredText}>klo 20:20</Text>
-          </View>
-          <BouncyCheckbox style={styles.checkbox} onPress={(isChecked: boolean) => {}} />
-        </View>
+        ))}
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -152,6 +157,14 @@ const styles = StyleSheet.create({
   checkbox: {
     marginLeft: 30,
   },
+  scrollViewContent: {
+    backgroundColor: "#afafaf",
+    flexGrow: 1,
+    alignItems: "center",
+    
+  },
 
 
 });
+
+

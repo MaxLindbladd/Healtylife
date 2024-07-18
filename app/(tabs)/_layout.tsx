@@ -27,9 +27,9 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="settings"
+          name="goals"
           options={{
-            title: 'Settings',
+            title: 'goals',
             tabBarShowLabel: false,
             tabBarIcon: ({ color }) => <FontAwesome size={28} name="calendar" color={color} />,
             headerShown: false
@@ -37,7 +37,7 @@ export default function TabLayout() {
         />
         <Tabs.Screen
 
-          name="details"
+          name="addTask"
           options={{
             title: '',
             tabBarShowLabel: false,

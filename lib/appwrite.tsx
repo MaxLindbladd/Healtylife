@@ -14,7 +14,8 @@ export const appwriteConfig = {
     databaseid: "6693e601002c4b898f42",
     usercollectionid: "6693e61900215182646e",
     trophyscollectionid: "6693e641001296914da8",
-    storageid: "6693e715001de1e3d145"
+    storageid: "6693e715001de1e3d145",
+    taskcollectionid: "6698ddaf00314e15a246",
 }
 
 const trophies = [
@@ -170,3 +171,48 @@ async function getUserTrophies(userid) {
 }
 
 export { getUserTrophies };
+
+
+async function getUserTask(userid) {
+  try {
+    console.log("haetaan taskeja");
+    const response = await databases.listDocuments(
+      appwriteConfig.databaseid,
+      appwriteConfig.taskcollectionid,
+      [Query.equal("userid", userid)]
+    );
+    return response.documents
+  } catch (error) {
+    console.log("error fetching tasks:", error);
+    return[];
+  }
+  
+}
+export { getUserTask};
+
+
+
+export const saveTask = async (task) => {
+  try {
+
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error('No user found');
+
+    console.log(task.period,task.imageSource);
+    const response = await databases.createDocument(
+      appwriteConfig.databaseid, 
+      appwriteConfig.taskcollectionid,
+      ID.unique(), 
+      {
+        userid: currentUser.$id,
+        title: task.title,
+        period: task.period,
+        imageSource: task.imageSource 
+      }
+    );
+
+    console.log('Task saved successfully:', response);
+  } catch (error) {
+    console.error('Error saving task:', error);
+  }
+};
