@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Image, TouchableOpacity, Modal, Text, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { saveTask } from '@/lib/appwrite';
+import { saveTask, updateTaskStatusDate } from '@/lib/appwrite';
 import ImagePicker from '@/components/imagePicker'; // Varmista oikea tuontipolku
+import { updateTask } from '@/lib/updateTask';
 
 export default function AddTaskScreen() {
   const [taskTitle, setTaskTitle] = useState('');
@@ -65,6 +66,7 @@ export default function AddTaskScreen() {
         </View>
       </TouchableOpacity>
       <Button title="Save Task" onPress={handleSaveTask} />
+      
       
       {/* Modal for Period Selection */}
       <Modal

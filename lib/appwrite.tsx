@@ -31,6 +31,11 @@ const trophies = [
   "Trophy 10",
 ];
 
+const getCurrentDate = () => {
+  const now = new Date();
+  console.log(now);
+  return now.toISOString(); // or any other format you prefer
+};
 
 const client = new Client();
 
@@ -207,12 +212,48 @@ export const saveTask = async (task) => {
         userid: currentUser.$id,
         title: task.title,
         period: task.period,
-        imageSource: task.imageSource 
+        imageSource: task.imageSource,
+        done: false, 
+        date: getCurrentDate(),
       }
     );
 
     console.log('Task saved successfully:', response);
   } catch (error) {
     console.error('Error saving task:', error);
+  }
+};
+
+
+
+export const updateTaskStatus = async (taskid, isChecked) => {
+  try {
+    await databases.updateDocument(
+      appwriteConfig.databaseid, 
+      appwriteConfig.taskcollectionid, 
+      taskid,
+      {
+      done: isChecked
+    });
+  } catch (error) {
+    console.error('Error updating task status:', error);
+    throw error;
+  }
+};
+
+export const updateTaskStatusDate = async (taskid, isChecked, date) => {
+  try {
+    console.log(`Updating task ${taskid} with done: ${isChecked} and date: ${date}`);
+    await databases.updateDocument(
+      appwriteConfig.databaseid, 
+      appwriteConfig.taskcollectionid, 
+      taskid,
+      {
+      done: isChecked,
+      date: date
+    });
+  } catch (error) {
+    console.error('Error updating task status:', error);
+    throw error;
   }
 };

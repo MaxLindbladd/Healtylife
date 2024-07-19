@@ -1,5 +1,5 @@
 import Thumbs from '@/components/thumbs';
-import { getCurrentUser, getUserTask } from '@/lib/appwrite';
+import { getCurrentUser, getUserTask, updateTaskStatus } from '@/lib/appwrite';
 import { useFocusEffect } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Dimensions,SafeAreaView } from 'react-native';
@@ -40,6 +40,23 @@ export default function DetailsScreen() {
   const weeklyTasks = filterTasksByPeriod("Viikoittain");
   const monthlyTasks = filterTasksByPeriod("Kuukausittain");
 
+  const handleCheckboxPress = async (taskItem, isChecked) => {
+    try {
+      console.log(taskItem)
+      await updateTaskStatus(taskItem.$id, isChecked);
+      
+      const updatedTasks = task.map(t =>
+        t.$id === taskItem.$id ? { ...t, done: isChecked } : t
+      );
+      setTask(updatedTasks);
+      
+      console.log(`Checkbox for task "${taskItem.title}" is ${isChecked}`);
+    } catch (error) {
+      console.error("Failed to update task status:", error);
+    }
+  };
+
+
   return (
     <SafeAreaView style={{backgroundColor: "#afafaf", flexGrow: 1}}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -57,6 +74,9 @@ export default function DetailsScreen() {
                   imageSource={PlaceholderImage}
                   title={taskItem.title}
                   period={taskItem.period}
+                  showCheckbox={true}
+                  onCheckboxPress={(isChecked) => handleCheckboxPress(taskItem, isChecked)}
+                  checked={taskItem.done}
                 />
               </View>
             ))}
@@ -65,7 +85,7 @@ export default function DetailsScreen() {
         ) : (
           <Text style={styles.leftAlignedText}>No daily tasks added</Text>
         )}
-
+        
         {/* Render weekly goals */}
         {weeklyTasks.length > 0 ? (
           <>
@@ -76,6 +96,9 @@ export default function DetailsScreen() {
                   imageSource={PlaceholderImage}
                   title={taskItem.title}
                   period={taskItem.period}
+                  showCheckbox={true}
+                  onCheckboxPress={(isChecked) => handleCheckboxPress(taskItem, isChecked)}
+                  checked={taskItem.done}
                 />
               </View>
             ))}
@@ -95,6 +118,9 @@ export default function DetailsScreen() {
                   imageSource={PlaceholderImage}
                   title={taskItem.title}
                   period={taskItem.period}
+                  showCheckbox={true}
+                  onCheckboxPress={(isChecked) => handleCheckboxPress(taskItem, isChecked)}
+                  checked={taskItem.done}
                 />
               </View>
             ))}

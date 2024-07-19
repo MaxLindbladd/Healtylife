@@ -4,7 +4,7 @@ import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 const windowWidth = Dimensions.get('window').width;
 
-const Thumbs = ({ imageSource, title, period, showCheckbox, onCheckboxPress }) => {
+const Thumbs = ({ imageSource, title, period, showCheckbox, onCheckboxPress, checked }) => {
     return (
       <View style={styles.thumbs}>
         <Image source={imageSource} style={styles.image} />
@@ -13,7 +13,11 @@ const Thumbs = ({ imageSource, title, period, showCheckbox, onCheckboxPress }) =
           <Text style={styles.centeredText}>{period}</Text>
         </View>
         {showCheckbox && (
-          <BouncyCheckbox style={styles.checkbox} onPress={onCheckboxPress} />
+          <BouncyCheckbox 
+          style={styles.checkbox} 
+          onPress={onCheckboxPress} 
+          isChecked = {checked} 
+          />
         )}
       </View>
     );

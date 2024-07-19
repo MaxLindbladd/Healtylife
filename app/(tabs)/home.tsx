@@ -1,22 +1,21 @@
-import { Link, useFocusEffect } from 'expo-router';
+import Thumbs from '@/components/thumbs';
+import { getCurrentUser, saveTrophy, getUserTask, updateTaskStatus } from '@/lib/appwrite';
 import { View, Text, StyleSheet, Dimensions, Image, SafeAreaView, ScrollView } from 'react-native';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import BouncyCheckbox from "react-native-bouncy-checkbox";
+import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { Pedometer } from 'expo-sensors';
 import { useEffect, useState } from 'react';
-import { getCurrentUser, saveTrophy, getUserTask } from '@/lib/appwrite';
-import Thumbs from '@/components/thumbs';
 import React from 'react';
+import { useFocusEffect } from 'expo-router';
+import { updateTask } from '@/lib/updateTask';
 
 const PlaceholderImage = require('/Users/maxlindblad/Healtylife/assets/images/react-logo.png');
 const windowWidth = Dimensions.get('window').width;
 
 export default function HomeScreen() {
-
   const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking');
   const [pastStepCount, setPastStepCount] = useState(0);
   const [task, setTask] = useState([]);
-  const [trophyGiven, setTophyGiven] = useState(false);
+  const [trophyGiven, setTrophyGiven] = useState(false);
 
   const subscribe = async () => {
     const isAvailable = await Pedometer.isAvailableAsync();
@@ -30,6 +29,7 @@ export default function HomeScreen() {
       const pastStepCountResult = await Pedometer.getStepCountAsync(start, end);
       if (pastStepCountResult) {
         setPastStepCount(pastStepCountResult.steps);
+        updateTask();
       }
     }
   };
@@ -39,12 +39,11 @@ export default function HomeScreen() {
     return () => subscription && subscription.remove();
   }, []);
 
-
   useEffect(() => {
     if (pastStepCount >= 100) {
       console.log("annetaan trophy")
-      //saveTrophy();                          ettei database täyty liikaa  poista kommentti jos haluat käyttää
-      setTophyGiven(true);
+      //saveTrophy(); // Poistettu kommentti jos haluat käyttää tietokantaa enemmän
+      setTrophyGiven(true);
     }
   }, [pastStepCount]);
 
@@ -62,43 +61,51 @@ export default function HomeScreen() {
       fetchTasks();
 
       return () => {
-        // Cleanup function if needed
+        
       };
     }, [])
   );
 
-  return (
-    <SafeAreaView style={{backgroundColor: "#afafaf", flexGrow: 1}}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-      <View style={styles.container}>
-        <View style={styles.topRow}>
-          <View style={styles.topText}>
-            <Text>Hello Max!</Text>
-            <Text>You have done amazing today</Text>
-          </View>
-          <Thumbs
-            imageSource={PlaceholderImage}
-            title={`olet saanut ${pastStepCount} askelta tänää`}
-            period="sinulla on 7x streak"
-          />
-        </View>
-        <Text style={styles.leftAlignedText} >päivittäiset tehtävät</Text>
-        
-        {task.map((task, index) => (
-        <View key={index} style={{ paddingVertical: 10 }}> 
-        <Thumbs
-        key={index}
-        imageSource={PlaceholderImage}
-        title={task.title}
-        period={task.period}
-        showCheckbox={true}
-        onCheckboxPress={(isChecked) => console.log(`Checkbox  is ${isChecked}`)}
-        />
-        </View>
-        
+  // Filter tasks where checked is false
 
-        ))}
-      </View>
+  
+  const uncheckedTasks = task.filter(item => !item.done);
+
+
+  return (
+    <SafeAreaView style={{ backgroundColor: "#afafaf", flexGrow: 1 }}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.container}>
+          <View style={styles.topRow}>
+            <View style={styles.topText}>
+              <Text>Hello Max!</Text>
+              <Text>You have done amazing today</Text>
+            </View>
+            <Thumbs
+              imageSource={PlaceholderImage}
+              title={`olet saanut ${pastStepCount} askelta tänää`}
+              period="sinulla on 7x streak"
+            />
+          </View>
+          <Text style={styles.leftAlignedText}>päivittäiset tehtävät</Text>
+
+          {uncheckedTasks.length > 0 ? (
+            uncheckedTasks.map((taskItem, index) => (
+              <View key={index} style={{ paddingVertical: 10 }}>
+                <Thumbs
+                  imageSource={PlaceholderImage}
+                  title={taskItem.title}
+                  period={taskItem.period}
+                  showCheckbox={true}
+                  onCheckboxPress={(isChecked) => updateTaskStatus(taskItem.$id, isChecked)}
+                />
+              </View>
+            ))
+          ) : (
+            <Text style={styles.leftAlignedText}>No unchecked tasks</Text>
+          )}
+
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -121,50 +128,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: 'center',
   },
-
-  image: {
-    width: 60,
-    height: 60,
-    margin: 20,
-
-  },
   topText: {
     margin: 30,
-  },
-  centeredText: {
-    paddingVertical: 4,
   },
   leftAlignedText: {
     padding: 30,
     fontSize: 28,
-    textAlign: 'left', 
-    alignSelf: 'flex-start' 
-  },
-  thumbs: {
-    backgroundColor: "white",
-    borderRadius: 30,
-    marginBottom: 10,
-    width: windowWidth - 40,
-    height: 80,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  thumbsColumn:{
-    flexDirection: "column",
-    alignItems: "flex-start",
-    
-  },
-  checkbox: {
-    marginLeft: 30,
+    textAlign: 'left',
+    alignSelf: 'flex-start'
   },
   scrollViewContent: {
     backgroundColor: "#afafaf",
     flexGrow: 1,
     alignItems: "center",
-    
   },
-
-
 });
-
-
