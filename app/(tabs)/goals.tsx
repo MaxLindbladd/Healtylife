@@ -77,6 +77,7 @@ export default function DetailsScreen() {
                   showCheckbox={true}
                   onCheckboxPress={(isChecked) => handleCheckboxPress(taskItem, isChecked)}
                   checked={taskItem.done}
+                  id ={taskItem.$id}
                 />
               </View>
             ))}
@@ -99,6 +100,7 @@ export default function DetailsScreen() {
                   showCheckbox={true}
                   onCheckboxPress={(isChecked) => handleCheckboxPress(taskItem, isChecked)}
                   checked={taskItem.done}
+                  id ={taskItem.$id}
                 />
               </View>
             ))}
@@ -121,6 +123,7 @@ export default function DetailsScreen() {
                   showCheckbox={true}
                   onCheckboxPress={(isChecked) => handleCheckboxPress(taskItem, isChecked)}
                   checked={taskItem.done}
+                  id ={taskItem.$id}
                 />
               </View>
             ))}

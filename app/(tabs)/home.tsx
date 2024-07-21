@@ -98,6 +98,7 @@ export default function HomeScreen() {
                   period={taskItem.period}
                   showCheckbox={true}
                   onCheckboxPress={(isChecked) => updateTaskStatus(taskItem.$id, isChecked)}
+                  id ={taskItem.$id}
                 />
               </View>
             ))

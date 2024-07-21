@@ -257,3 +257,19 @@ export const updateTaskStatusDate = async (taskid, isChecked, date) => {
     throw error;
   }
 };
+
+
+export async function removeTask(taskid) {
+  try {
+    await databases.deleteDocument(
+      appwriteConfig.databaseid,
+      appwriteConfig.taskcollectionid,
+      taskid
+    );
+    
+  } catch (error) {
+    console.log("error poistaeesa taskia", error)
+    
+  }
+  
+};
