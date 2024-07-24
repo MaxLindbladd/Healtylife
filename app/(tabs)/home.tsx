@@ -30,6 +30,7 @@ export default function HomeScreen() {
       if (pastStepCountResult) {
         setPastStepCount(pastStepCountResult.steps);
         updateTask();
+        console.log("taskit updated homescreeniltä")
       }
     }
   };
@@ -40,7 +41,7 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    if (pastStepCount >= 100) {
+    if (pastStepCount >= 10000) {
       console.log("annetaan trophy")
       //saveTrophy(); // Poistettu kommentti jos haluat käyttää tietokantaa enemmän
       setTrophyGiven(true);

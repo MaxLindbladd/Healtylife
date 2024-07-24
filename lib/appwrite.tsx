@@ -6,6 +6,7 @@ import {
     Query,
     Storage,
   } from "react-native-appwrite";
+import { getRandomTrophy } from "./trophies";
 
 export const appwriteConfig = {
     endpoint: "https://cloud.appwrite.io/v1",
@@ -16,20 +17,10 @@ export const appwriteConfig = {
     trophyscollectionid: "6693e641001296914da8",
     storageid: "6693e715001de1e3d145",
     taskcollectionid: "6698ddaf00314e15a246",
+    pointscollectionid: "669d3634003d5634278a",
 }
 
-const trophies = [
-  "Trophy 1",
-  "Trophy 2",
-  "Trophy 3",
-  "Trophy 4",
-  "Trophy 5",
-  "Trophy 6",
-  "Trophy 7",
-  "Trophy 8",
-  "Trophy 9",
-  "Trophy 10",
-];
+
 
 const getCurrentDate = () => {
   const now = new Date();
@@ -65,6 +56,7 @@ export async function createUser(email: string, password: string, username: stri
         accountid: newAccount.$id,
         email: email,
         username: username,
+        token: 0,
       }
     );
     console.log(newUser, "tehty uusi käyttäjä")
@@ -132,10 +124,6 @@ export async function signOut() {
 
 
 
-function getRandomTrophy() {
-  const randomIndex = Math.floor(Math.random() * trophies.length);
-  return trophies[randomIndex];
-}
 
 async function saveTrophy() {
   const trophy = getRandomTrophy();
@@ -150,7 +138,7 @@ async function saveTrophy() {
       ID.unique(),
       {
         userid: currentUser.$id,
-        trophy: trophy,
+        trophy: trophy.name,
       }
     );
     console.log('Trophy saved:', response);
@@ -273,3 +261,59 @@ export async function removeTask(taskid) {
   }
   
 };
+
+
+
+
+
+export async function handleTokens(amount) {
+  const currentUser = await getCurrentUser();
+  
+  if (!currentUser) {
+    console.log("User not logged in");
+    return;
+  }
+
+  try {
+    // Retrieve the current user's document
+    const userDocument = await fetchUserdocument(currentUser.$id)
+
+    // Calculate the new token balance
+    const newTokenBalance = (userDocument.token || 0) + amount;
+    console.log(newTokenBalance);
+
+    // Update the user document with the new token balance
+    const updatedUserDocument = await databases.updateDocument(
+      appwriteConfig.databaseid,
+      appwriteConfig.usercollectionid,
+      currentUser.$id, 
+      { token: newTokenBalance }
+    );
+
+    console.log("Token balance updated successfully", updatedUserDocument);
+  } catch (error) {
+    console.log("Error updating token balance", error);
+  }
+}
+
+export async function fetchUserdocument($id) {
+  
+  const userDocument = await databases.getDocument(
+    appwriteConfig.databaseid,
+    appwriteConfig.usercollectionid,
+    $id 
+  );
+
+  
+
+  if (!userDocument) {
+    console.log("User document not found");
+    return;
+  }
+  return userDocument;
+};
+//kesken
+export async function removeChest(chestid) {
+  const chest
+  
+}
